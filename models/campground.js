@@ -16,7 +16,7 @@ const CampgroundSchema = new Schema({
     ]
 });
 
-//query middleware
+//query of mongoose middleware
 
 CampgroundSchema.post('findOneAndDelete', async function (doc) {
     if(doc){
