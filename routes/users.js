@@ -3,6 +3,7 @@ const router = express.Router();
 const catchAsync = require('../utils/catchAsync');
 const passport = require('passport');
 const auth = require('../controllers/auth');
+const {storeReturnTo} = require("../middleware");
 
 router.route('/register')
     .get(auth.renderRegister)
@@ -10,7 +11,7 @@ router.route('/register')
 
 router.route('/login')
     .get(auth.renderLogin)
-    .post(passport.authenticate('local', { 
+    .post(storeReturnTo, passport.authenticate('local', { 
     failureFlash: true, 
     failureRedirect:"/login",  
     keepSessionInfo: true, 

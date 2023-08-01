@@ -1,7 +1,7 @@
 if(process.env.NODE_ENV !== "production"){
     require('dotenv').config();
 }
-
+require('dotenv').config();
 
 const express = require('express');
 const path = require('path');
@@ -14,13 +14,18 @@ const methodOverride = require('method-override');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user')
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
 
 const usersRoutes = require('./routes/users');
 const campgroundsRoutes = require('./routes/campgrounds');
 const reviewsRoutes = require('./routes/reviews');
 
+const MongoDBStore = require("connect-mongo")(session);
 
-mongoose.connect('mongodb://127.0.0.1:27017/yelp-camp');
+const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/yelp-camp';
+
+mongoose.connect(dbUrl );
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -37,19 +42,38 @@ app.set('views', path.join(__dirname, 'views'))
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(mongoSanitize({
+    replaceWith: '-'
+}))
+
+const secret = process.env.SECRET || 'thisisshouldbeabettersecret!';
+
+const store = new MongoDBStore({
+    url: dbUrl,
+    secret: secret,
+    touchAfter: 24 * 60 * 60
+})
+
+store.on("error", function(e){
+    console.log("SESSION STORE ERROR", e)
+})
 
 const sessionConfig = {
-    secret: 'thisis',
+    store: store,
+    name: 'session',
+    secret: secret,
     resave: false,
     saveUninitialized: true,
     cookie:{
         httpOnly: true,
+        // secure: true,
         expires: Date.now() + 1000*60*60*24*7,
         maxAge: 1000*60*60*24*7
     }
 }
-app.use(session(sessionConfig))
+app.use(session(sessionConfig));
 app.use(flash());
+app.use(helmet({contentSecurityPolicy: false}));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -60,6 +84,7 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
     // console.log(req.session);
+    // console.log(req.query);    
     if(!['/login', '/', '/register'].includes(req.originalUrl)){
         req.session.returnTo = req.originalUrl;
     }
@@ -96,6 +121,8 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render('error', { err })
 })
 
-app.listen(4000, () => {
-    console.log('Serving on port 4000')
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => {
+    console.log(`Serving on port ${port}`)
 })
