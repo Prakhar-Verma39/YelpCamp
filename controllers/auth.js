@@ -42,5 +42,5 @@ module.exports.logout = (req, res, next) => {
 };
 
 module.exports.renderPP = (req, res) => {
-    res.render('/privacy-policy');
+    res.render('privacy-policy');
 };
