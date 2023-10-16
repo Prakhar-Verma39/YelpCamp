@@ -40,3 +40,7 @@ module.exports.logout = (req, res, next) => {
         res.redirect('/campgrounds');
     });
 };
+
+module.exports.renderPP = (req, res) => {
+    res.render('/privacy-policy');
+};

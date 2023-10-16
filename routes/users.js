@@ -20,4 +20,6 @@ router.route('/login')
 
 router.get('/logout', auth.logout); 
 
+router.get('/privacy-policy', auth.renderPP); 
+
 module.exports = router;
