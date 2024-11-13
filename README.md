@@ -37,7 +37,7 @@ The YelpCamp project was developed using a variety of technologies, including:
 
 - **Authentication**: Passport.js (User authentication middleware).
   
-- **Media Storage**: Cloudinary(for image storage).
+- **Media Storage**: Cloudinary(for image storage)
 
 ## Project Screenshots
 
